@@ -40,18 +40,17 @@ def link_id(linked_id: LinkID):
         raise HTTPException(status_code=400, detail="User not found")
     return {"message": "ID linked successfully"}
 
-# Function to update user details in 'user_details' collection
+#  update user details in collection
 @router.post("/update_user_details/{link_id}")
 def update_user_details(link_id: str, user_details: UserDetails):
-    # Check if the user exists in 'users' collection
+    
     existing_user = db.users.find_one({"linked_id": link_id})
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Convert user_id to ObjectId for storing in 'user_details' collection
+
     user_details_dict = user_details.dict()
 
-    # Upsert (update or insert) user details in 'user_details' collection
     result = db.user_details.update_one(
         {"linked_id": link_id},
         {"$set": user_details_dict},
@@ -61,7 +60,7 @@ def update_user_details(link_id: str, user_details: UserDetails):
     if result.modified_count == 0 and result.upserted_id is None:
         raise HTTPException(status_code=500, detail="Failed to update user details")
 
-    # Update the users collection to store the user_details ID
+
     db.users.update_one(
         {"linked_id": link_id},
         {"$set": {"user_details_id": str(result.upserted_id) if result.upserted_id else str(db.user_details.find_one({"linked_id": link_id})["_id"])}}
@@ -72,12 +71,10 @@ def update_user_details(link_id: str, user_details: UserDetails):
 # Function to join data from multiple collections
 @router.get("/user_with_details/{email}")
 def get_user_with_details(email: str):
-    # Fetch user details from the 'users' collection
     user = db.users.find_one({"email": email})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Perform an aggregation pipeline to join 'users' and 'user_details'
     pipeline = [
         {
             "$match": {"email": email}
@@ -106,7 +103,6 @@ def get_user_with_details(email: str):
         }
     ]
 
-    # Execute the aggregation pipeline
     result = list(db.users.aggregate(pipeline))
     if not result:
         raise HTTPException(status_code=404, detail="User details not found")
