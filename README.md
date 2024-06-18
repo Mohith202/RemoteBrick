@@ -2,6 +2,8 @@ Create virtal environment : **python3 -m venv envi**
 
 Activate it: **envi\Scripts\activate**
 
+We can also use **pip install -r requirments.txt** but I am having saome problem in my local Machine so just plz copy paste the following cmd line.
+
 In Virtual environment install required packages using cmd:**pip install fastapi uvicorn pymongo pydantic bcrypt**
 
 Pull all files from the repository.
